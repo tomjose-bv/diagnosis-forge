@@ -37,6 +37,11 @@
   diagnoser solves all. Lessons: at 1x scale noise rivals the planted effects; refunds lag
   orders by up to 14 days; a slice with zero traffic needs special handling (0/0 ratios
   skipped). 55 tests passing.
+- M1.7 5 held-out scenarios in scenarios/heldout/ (traffic boost on one channel+region for
+  ad_spend, accessory refund wave, brand-search conversion drop with a traffic distractor,
+  starter-kit price rise, no-cause orders with an irrelevant CPC change), committed before
+  any agent code; the reference solves all (the refund scenario was strengthened before
+  commit, not the reference). 60 tests passing.
 
 ## Ideas for later
 
@@ -48,8 +53,7 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Milestone 1, step 7: 5 held-out scenarios in scenarios/heldout/ (generator already has them:
-run the scratch generator with 'heldout' or recreate), committed on their own before any
-agent code; reference must solve them. Then step 8: catalog for agents (schema + metric
-definitions + answer format) and CLI `diagnosis-forge eval` (reference over a set, JSON
-report).
+Milestone 1, step 8: catalog for agents (tables + columns, metric definitions from
+metrics.DESCRIPTIONS, dimensions, the answer JSON format and mechanism names) in
+`catalog.py`, and CLI `diagnosis-forge eval --set dev|heldout [--scenario X] [--out f.json]`
+running the reference diagnoser. Then employer-terms check; milestone 1 done.

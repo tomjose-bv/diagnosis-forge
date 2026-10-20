@@ -1,0 +1,18 @@
+name: east_social_traffic_boost
+question: Why did ad spend rise between 1 and 14 March 2026, compared with the two weeks before (15 to
+  28 February)?
+seed: 201
+business: {days: 90, scale: 3.0}
+metric: ad_spend
+compare:
+  current: ['2026-03-01', '2026-03-14']
+  baseline: ['2026-02-15', '2026-02-28']
+effects:
+- driver: sessions
+  factor: 4.0
+  start: '2026-03-01'
+  end: '2026-03-14'
+  where: {channel: paid_social, region: east}
+cause:
+  driver: sessions
+  where: {channel: paid_social, region: east}
