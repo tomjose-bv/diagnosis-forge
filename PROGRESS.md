@@ -42,6 +42,9 @@
   starter-kit price rise, no-cause orders with an irrelevant CPC change), committed before
   any agent code; the reference solves all (the refund scenario was strengthened before
   commit, not the reference). 60 tests passing.
+- M1.8 `catalog.py` (tables, dimensions, metric definitions, answer JSON format, mechanism
+  names) and CLI `diagnosis-forge eval` / `catalog`; reference solves all 5 held-out
+  scenarios. Employer-terms checks clean. 62 tests passing. **Milestone 1 done.**
 
 ## Ideas for later
 
@@ -53,7 +56,8 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Milestone 1, step 8: catalog for agents (tables + columns, metric definitions from
-metrics.DESCRIPTIONS, dimensions, the answer JSON format and mechanism names) in
-`catalog.py`, and CLI `diagnosis-forge eval --set dev|heldout [--scenario X] [--out f.json]`
-running the reference diagnoser. Then employer-terms check; milestone 1 done.
+Milestone 2, step 1: LLM client (copy connector-forge llm.py, extract the JSON answer),
+agent tools with guard: ToolBox(scenario) with read_question, read_catalog, run_sql
+(sqlguard, max 50 rows shown, query budget), submit_answer (parse errors returned; scored
+later on the same data), call log. Agents see the scenario's data (that is the task) but
+never the planted cause. Then prompt and sql-loop agents + CLI.
