@@ -49,6 +49,12 @@
   read_question (question + periods, never the cause), read_catalog, run_sql (sqlguard, 30
   rows shown), check_answer (parse + re-run evidence, reviewer-style), submit; per-tool
   limits; blocked SQL counted. 68 tests passing.
+- M2.2 `agents.py`: system prompt (smallest explaining slice + mechanism, null for noise, no
+  numbers without queries); `prompt` (one call, evidence it never ran) and `sql-loop` (one
+  query per reply via ```sql, results fed back, budget 12, forced final answer); AgentResult
+  with score, usage, queries, tool log; CLI `diagnosis-forge agent --variant prompt|sql-
+  loop` with crash isolation. 75 tests passing (13.5 min under CPU contention with the
+  Ollama benchmark). **Milestone 2 done.**
 
 ## Ideas for later
 
@@ -60,8 +66,7 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Milestone 2, step 2: agents.py with `prompt` (one call: catalog + question -> answer JSON)
-and `sql-loop` (each reply is either SQL: <one query> or the final JSON; up to 12 queries;
-results truncated; last turn forces an answer), AgentResult (score dict, usage, queries,
-tool log), CLI `diagnosis-forge agent --variant ...` with crash isolation and summary.json.
-Tests with FakeLLM.
+Speed up tests: cache build(scenario) results in-process (same data for the same scenario),
+and share module-scoped fixtures. Then milestone 3: graph agent (size the change -> split by
+each dimension with harness-written breakdown SQL -> model picks the slice and drills ->
+mechanism check queries -> draft answer -> check_answer -> fix up to 2 rounds).
