@@ -55,6 +55,12 @@
   with score, usage, queries, tool log; CLI `diagnosis-forge agent --variant prompt|sql-
   loop` with crash isolation. 75 tests passing (13.5 min under CPU contention with the
   Ollama benchmark). **Milestone 2 done.**
+- M3.1 `graph` agent: model picks the metric; code measures the change (logged run_sql with
+  literal SQL); up to 3 drill-down rounds where code shows breakdown tables (current,
+  baseline, change, share of total change) for every remaining dimension and the model
+  replies drill/stop/noise; code shows all driver metrics for the slice and the model picks
+  the mechanism; answer assembled with evidence from the queries that ran, checked,
+  submitted. CLI `--variant graph`. **Milestone 3 done.** 78 tests passing.
 
 ## Ideas for later
 
@@ -66,7 +72,8 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Speed up tests: cache build(scenario) results in-process (same data for the same scenario),
-and share module-scoped fixtures. Then milestone 3: graph agent (size the change -> split by
-each dimension with harness-written breakdown SQL -> model picks the slice and drills ->
-mechanism check queries -> draft answer -> check_answer -> fix up to 2 rounds).
+Milestone 4: vague questions + graph+clarify. Add 4 vague dev scenarios (e.g. 'Something is
+off with marketing lately, can you look?') with `vague: true` and scripted clarifications
+{regex: answer} giving metric and periods; for vague scenarios read_question shows only the
+question (no periods) until clarified; ScriptedUser like flow-forge; graph+clarify asks up
+to 3 questions first (implement _clarify); questions counted. Tests with FakeLLM.

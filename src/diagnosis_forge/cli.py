@@ -102,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
     ev.add_argument("--out")
     ev.add_argument("--root", default=".")
     ag = sub.add_parser("agent", help="run an AI agent on scenarios (needs Ollama)")
-    ag.add_argument("--variant", required=True, choices=("prompt", "sql-loop"))
+    ag.add_argument("--variant", required=True, choices=("prompt", "sql-loop", "graph"))
     ag.add_argument("--set", choices=("dev", "heldout"), default="dev")
     ag.add_argument("--scenario", action="append")
     ag.add_argument("--model", default="qwen2.5-coder:3b")

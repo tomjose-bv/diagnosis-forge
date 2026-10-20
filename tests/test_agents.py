@@ -53,3 +53,33 @@ def test_sql_loop_blocked_query(tmp_path):
     llm = FakeLLM([fenced("DELETE FROM orders", "sql"), fenced(GOOD)])
     r = run_sql_loop(S, llm, tmp_path)
     assert r.blocked == 1 and r.score["success"]
+
+
+def test_graph_drills_and_answers(tmp_path):
+    from diagnosis_forge.agents import run_graph
+
+    llm = FakeLLM(['{"metric": "refunds"}', '{"drill": {"product": "pro_plan"}}', '{"stop": true}',
+                   '{"mechanism": "refunds"}'])
+    r = run_graph(S, llm, tmp_path)
+    assert r.score["success"], r.score
+    assert r.score["evidence_verified"] == r.score["evidence_total"] == 4
+    drill_prompt = llm.seen[1][1]["content"]
+    assert "by product" in drill_prompt and "pro_plan" in drill_prompt and "share of total change" in drill_prompt
+    assert "refund_rate" in llm.seen[3][1]["content"]
+
+
+def test_graph_noise(tmp_path):
+    from diagnosis_forge.agents import run_graph
+
+    calm = load(ROOT / "scenarios/dev/no_cause_revenue.yaml")
+    r = run_graph(calm, FakeLLM(['{"metric": "revenue"}', '{"noise": true}']), tmp_path)
+    assert r.score["cause"] == "correct_none"
+
+
+def test_graph_bad_metric_and_bad_drill(tmp_path):
+    from diagnosis_forge.agents import run_graph
+
+    r = run_graph(S, FakeLLM(['{"metric": "happiness"}']), tmp_path / "a")
+    assert r.score is None and "unknown metric" in r.error
+    r = run_graph(S, FakeLLM(['{"metric": "refunds"}', '{"drill": {"color": "red"}}']), tmp_path / "b")
+    assert r.score["cause"] == "missed"
