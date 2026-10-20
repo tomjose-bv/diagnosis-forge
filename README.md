@@ -9,8 +9,9 @@ Everything runs on one machine: Ollama for the model, DuckDB for the data.
 Most "ask your data" tools give a confident paragraph. This project measures whether the
 paragraph is right and whether its evidence holds up.
 
-**Status:** milestones 1 and 2 of 5 done: the benchmark plus guarded tools and the first two AI
-agents (`prompt` and `sql-loop`). The structured agent comes next (see [Roadmap](#roadmap)).
+**Status:** milestones 1–3 of 5 done: the benchmark, guarded tools and three AI agents including
+`graph`, where the code runs the analyses and the model makes the decisions. Vague questions
+and clarifying questions come next (see [Roadmap](#roadmap)).
 
 ## How it works
 
@@ -50,6 +51,7 @@ scenario YAML ──► business simulator (seeded) ──► DuckDB: sessions, 
 | `reference` | hand-written drill-down, no model; proves the scenarios are solvable |
 | `prompt` | one model call from the catalog and question; cites queries it never ran |
 | `sql-loop` | runs one query per reply (up to 12), then answers |
+| `graph` | the code runs the standard analyses (change size, breakdowns by every dimension, driver metrics); the model decides metric, noise, where to drill and the mechanism |
 
 Agents only see the question, a catalog of tables and metrics, and query results. A guard allows
 one read-only `SELECT`/`WITH` statement per query (no file access, time and row limits), limits
@@ -68,7 +70,7 @@ python scripts/setup.py
 ```
 .venv\Scripts\diagnosis-forge eval --set dev             # the reference diagnoser on every scenario
 .venv\Scripts\diagnosis-forge catalog                    # what agents are told about the data
-.venv\Scripts\diagnosis-forge agent --variant sql-loop --set dev --scenario pro_plan_refunds
+.venv\Scripts\diagnosis-forge agent --variant graph --set dev --scenario pro_plan_refunds
 ```
 
 The agents need [Ollama](https://ollama.com) and `ollama pull qwen2.5-coder:3b`.
@@ -77,7 +79,7 @@ The agents need [Ollama](https://ollama.com) and `ollama pull qwen2.5-coder:3b`.
 
 1. ~~Simulator, planted causes, metrics, answer format, evidence checks, scoring, reference diagnoser.~~
 2. ~~Guard, tools, LLM client, `prompt` and `sql-loop` agents.~~
-3. The `graph` agent: the code runs the analyses, the model decides.
+3. ~~The `graph` agent.~~
 4. Vague questions and `graph+clarify`, which asks clarifying questions first.
 5. Runs over three seeds, results in this README, CI, v0.1.0 release.
 
