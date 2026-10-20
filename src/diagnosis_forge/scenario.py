@@ -122,8 +122,21 @@ def load(path: str | Path) -> Scenario:
         return parse(yaml.safe_load(f))
 
 
-def build(s: Scenario):
-    """Simulate the scenario's business and load it into an in-memory DuckDB."""
+_BUILT: dict[str, object] = {}
+
+
+def build(s: Scenario, fresh: bool = False):
+    """Simulate the scenario's business and load it into an in-memory DuckDB.
+
+    Results are cached per process (same business, seed and effects -> same database), since
+    building takes seconds and everything that uses it only reads. Pass fresh=True for a new one.
+    """
     from diagnosis_forge.sim import load as load_db, simulate
 
-    return load_db(simulate(s.business, s.seed, s.effects))
+    key = repr((s.business, s.seed, s.effects))
+    if fresh or key not in _BUILT:
+        con = load_db(simulate(s.business, s.seed, s.effects))
+        if fresh:
+            return con
+        _BUILT[key] = con
+    return _BUILT[key]
