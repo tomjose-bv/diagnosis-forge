@@ -17,6 +17,12 @@
   (question, seed, business size, metric, current/baseline periods, effects, planted cause
   matched to an effect or null, vague + clarifications; mechanism names; build() -> DuckDB).
   18 tests passing.
+- M1.4 `sqlguard.py` (one SELECT/WITH statement, no file/settings functions, time limit via
+  interrupt, row limit), `answer.py` (answer JSON: metric, change pct, cause where+mechanism
+  or null, evidence claim/sql/value; parse from text; evidence re-run with 1% tolerance;
+  score: exact/partial/wrong/missed/correct_none/false_alarm, mechanism, change sign+size,
+  verified vs unsupported evidence, success). Channel implied by campaign is normalized. 31
+  tests passing.
 
 ## Ideas for later
 
@@ -28,10 +34,10 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Milestone 1, step 4: answer format + evidence checker + scoring.
-`src/diagnosis_forge/answer.py`: Answer JSON {metric, change: {current, baseline, pct},
-cause: {where: {dim: value}, mechanism} | null, evidence: [{claim, sql, value}]}; parse with
-readable errors; check_evidence(con, answer): run each SQL read-only (SELECT/WITH only,
-single statement, time/row limits), first cell vs cited value (rel tol 1%) -> verified/total
-+ per-item reasons; score(scenario, answer, con) -> cause exact/partial/wrong, mechanism ok,
-change sign/size ok, evidence validity, unsupported claims, false alarm. Tests.
+Milestone 1, step 5: reference diagnoser (no AI) in `src/diagnosis_forge/reference.py`:
+compute change; if |pct| below a noise threshold (from baseline weekly variation) -> no
+cause; else for each dimension of the metric, breakdown and pick the largest-|delta| value,
+then drill into it with the remaining dimensions while one value explains >= 60% of the
+parent's delta; mechanism by checking drivers on the chosen slice (sessions, cpc,
+conversion, price=AOV, refund rate) and picking the one with the largest relative change;
+evidence = the SQL it used with values. Tests on 3 planted scenarios + 1 no-cause.
