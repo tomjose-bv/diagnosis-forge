@@ -106,9 +106,13 @@ def diagnose(s: Scenario, con) -> dict[str, Any]:
             a, b = value(con, driver, *s.current, w), value(con, driver, *s.baseline, w)
         except ValueError:
             continue
-        if a <= 0 or b <= 0:
+        if is_ratio(driver):
+            den = parts(driver)[2]
+            if not value(con, den, *s.current, w) or not value(con, den, *s.baseline, w):
+                continue  # 0/0: the ratio says nothing when its base vanished
+        if b <= 0:
             continue
-        change = abs(math.log(a / b))
+        change = abs(math.log(a / b)) if a > 0 else float("inf")  # a slice that disappeared
         if change > best_change:
             mech, best_change, used = m, change, (driver, w, a, b)
     if mech is None:

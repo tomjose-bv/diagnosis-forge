@@ -1,0 +1,11 @@
+name: no_cause_revenue
+question: Did anything unusual happen to revenue between 1 and 14 March 2026, compared with the two weeks
+  before (15 to 28 February)?
+seed: 116
+business: {days: 90, scale: 3.0}
+metric: revenue
+compare:
+  current: ['2026-03-01', '2026-03-14']
+  baseline: ['2026-02-15', '2026-02-28']
+effects: []
+cause: null

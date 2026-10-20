@@ -1,0 +1,18 @@
+name: social_cpc_spike
+question: Ad spend jumped between 1 and 14 March 2026, compared with the two weeks before (15 to 28 February).
+  What happened?
+seed: 101
+business: {days: 90, scale: 3.0}
+metric: ad_spend
+compare:
+  current: ['2026-03-01', '2026-03-14']
+  baseline: ['2026-02-15', '2026-02-28']
+effects:
+- driver: cpc
+  factor: 3.0
+  start: '2026-03-01'
+  end: '2026-03-14'
+  where: {campaign: spring_promo, region: west}
+cause:
+  driver: cpc
+  where: {campaign: spring_promo, region: west}

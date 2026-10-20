@@ -1,0 +1,18 @@
+name: social_roas_drop
+question: Return on ad spend (revenue / ad spend) fell between 1 and 14 March 2026, compared with the
+  two weeks before (15 to 28 February). Why?
+seed: 113
+business: {days: 90, scale: 3.0}
+metric: roas
+compare:
+  current: ['2026-03-01', '2026-03-14']
+  baseline: ['2026-02-15', '2026-02-28']
+effects:
+- driver: cpc
+  factor: 2.2
+  start: '2026-03-01'
+  end: '2026-03-14'
+  where: {channel: paid_social}
+cause:
+  driver: cpc
+  where: {channel: paid_social}

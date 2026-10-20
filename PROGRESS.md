@@ -30,6 +30,13 @@
   refund_rate), evidence = literal SQL (metrics.sql_for) with values. New metrics units,
   unit_price, refund_rate. Scoring treats a single-campaign channel as the channel. Perfect
   on 5 planted cases + no-cause. 37 tests passing.
+- M1.6 17 dev scenarios (scenarios/dev/; business 90 days at 3x scale for less noise): all
+  five drivers across channels, campaigns, regions, products; metrics revenue, ad_spend,
+  orders, refunds, net_revenue, sessions, roas; 2 with distractors; 2 no-cause (one with an
+  irrelevant real change). Each planted cause moves its metric >= 10%; the reference
+  diagnoser solves all. Lessons: at 1x scale noise rivals the planted effects; refunds lag
+  orders by up to 14 days; a slice with zero traffic needs special handling (0/0 ratios
+  skipped). 55 tests passing.
 
 ## Ideas for later
 
@@ -41,9 +48,8 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Milestone 1, step 6: dev scenarios. ~16 YAMLs in scenarios/dev/ covering all 5 drivers on
-different dimensions and metrics (revenue, ad_spend, refunds, net_revenue, orders, sessions,
-conversion_rate, roas), a few with a distractor effect, 2 no-cause; questions in plain
-English stating metric and periods. Test: each loads, its planted effect is material
-(|metric change| >= 10% unless no-cause), and the reference diagnoser succeeds. Fix
-scenarios (not the reference) when the planted change is too small.
+Milestone 1, step 7: 5 held-out scenarios in scenarios/heldout/ (generator already has them:
+run the scratch generator with 'heldout' or recreate), committed on their own before any
+agent code; reference must solve them. Then step 8: catalog for agents (schema + metric
+definitions + answer format) and CLI `diagnosis-forge eval` (reference over a set, JSON
+report).

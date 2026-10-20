@@ -1,0 +1,18 @@
+name: social_checkout_issue
+question: We got fewer orders between 1 and 14 March 2026, compared with the two weeks before (15 to 28
+  February). What caused it?
+seed: 104
+business: {days: 90, scale: 3.0}
+metric: orders
+compare:
+  current: ['2026-03-01', '2026-03-14']
+  baseline: ['2026-02-15', '2026-02-28']
+effects:
+- driver: conversion
+  factor: 0.4
+  start: '2026-03-01'
+  end: '2026-03-14'
+  where: {channel: paid_social}
+cause:
+  driver: conversion
+  where: {channel: paid_social}
