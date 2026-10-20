@@ -11,6 +11,12 @@
   sessions/cpc/conversion/price/refund_rate, factor, date range, where dims); load() into
   DuckDB via temp CSVs (120 days: ~14.5k orders, 0.3 s simulate, ~2 s load). 8 tests
   passing.
+- M1.3 `metrics.py` (revenue, orders, sessions, ad_spend, clicks, refunds by refund date
+  with order dims, and ratios net_revenue, conversion_rate, roas, cpc, average_order_value;
+  value() and breakdown() by dimension with deltas, largest first) and `scenario.py`
+  (question, seed, business size, metric, current/baseline periods, effects, planted cause
+  matched to an effect or null, vague + clarifications; mechanism names; build() -> DuckDB).
+  18 tests passing.
 
 ## Ideas for later
 
@@ -22,11 +28,10 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Milestone 1, step 3: scenario format. `src/diagnosis_forge/scenario.py`: YAML {name,
-question (plain English), seed, business overrides (days, scale), metric (revenue |
-net_revenue | orders | ad_spend | conversion_rate | refunds | roas), compare: {current:
-[start, end], baseline: [start, end]}, effects: [...], cause: {driver, where} (the planted
-ground truth; null for no-cause scenarios), distractors: [...] (effects that are real but
-not the answer), vague: bool, clarifications: {regex: answer}}; validation (dates inside the
-simulated range, cause matches one effect). Metric SQL definitions in `metrics.py` (value
-for a period, optionally grouped by dims). Tests.
+Milestone 1, step 4: answer format + evidence checker + scoring.
+`src/diagnosis_forge/answer.py`: Answer JSON {metric, change: {current, baseline, pct},
+cause: {where: {dim: value}, mechanism} | null, evidence: [{claim, sql, value}]}; parse with
+readable errors; check_evidence(con, answer): run each SQL read-only (SELECT/WITH only,
+single statement, time/row limits), first cell vs cited value (rel tol 1%) -> verified/total
++ per-item reasons; score(scenario, answer, con) -> cause exact/partial/wrong, mechanism ok,
+change sign/size ok, evidence validity, unsupported claims, false alarm. Tests.
