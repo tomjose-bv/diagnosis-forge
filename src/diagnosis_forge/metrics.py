@@ -17,6 +17,8 @@ _SUM = {
                 ("channel", "campaign", "region", "product")),
     "orders": ("SELECT {dim} AS k, COUNT(*) AS v FROM orders WHERE date BETWEEN ? AND ? {f} GROUP BY 1",
                ("channel", "campaign", "region", "product")),
+    "units": ("SELECT {dim} AS k, SUM(quantity) AS v FROM orders WHERE date BETWEEN ? AND ? {f} GROUP BY 1",
+              ("channel", "campaign", "region", "product")),
     "sessions": ("SELECT {dim} AS k, SUM(sessions) AS v FROM sessions WHERE date BETWEEN ? AND ? {f} GROUP BY 1",
                  ("channel", "campaign", "region")),
     "ad_spend": ("SELECT {dim} AS k, SUM(spend) AS v FROM ad_spend WHERE date BETWEEN ? AND ? {f} GROUP BY 1",
@@ -32,6 +34,8 @@ _RATIO = {
     "roas": ("revenue", "/", "ad_spend"),
     "cpc": ("ad_spend", "/", "clicks"),
     "average_order_value": ("revenue", "/", "orders"),
+    "unit_price": ("revenue", "/", "units"),
+    "refund_rate": ("refunds", "/", "revenue"),
 }
 METRICS = sorted(set(_SUM) | set(_RATIO))
 DESCRIPTIONS = {
@@ -46,6 +50,9 @@ DESCRIPTIONS = {
     "roas": "revenue / ad_spend (return on ad spend)",
     "cpc": "ad_spend / clicks (cost per click)",
     "average_order_value": "revenue / orders",
+    "units": "sum of orders.quantity",
+    "unit_price": "revenue / units",
+    "refund_rate": "refunds / revenue",
 }
 
 
@@ -93,3 +100,32 @@ def breakdown(con, metric: str, current: tuple[date, date], baseline: tuple[date
     rows = [{"value": k, "current": cur.get(k, 0.0), "baseline": base.get(k, 0.0),
              "delta": cur.get(k, 0.0) - base.get(k, 0.0)} for k in set(cur) | set(base)]
     return sorted(rows, key=lambda r: (-abs(r["delta"]), str(r["value"])))
+
+
+def is_ratio(metric: str) -> bool:
+    return metric in _RATIO
+
+
+def parts(metric: str) -> tuple[str, str, str]:
+    return _RATIO[metric]
+
+
+def _lit(v: Any) -> str:
+    return "'" + str(v).replace("'", "''") + "'"
+
+
+def sql_for(metric: str, start: date, end: date, where: dict[str, str] | None = None) -> str:
+    """A self-contained SQL query (literals, no parameters) returning the metric as one number."""
+    where = where or {}
+    if metric in _SUM:
+        sql, _ = _SUM[metric]
+        f, params = _filter(where, metric)
+        text = sql.format(dim="'all'", f=f).replace(" GROUP BY 1", "")
+        for v in [start.isoformat(), end.isoformat(), *params]:
+            text = text.replace("?", _lit(v), 1)
+        return text.replace("SELECT 'all' AS k, ", "SELECT ")
+    a, op, b = _RATIO[metric]
+    x, y = sql_for(a, start, end, where), sql_for(b, start, end, where)
+    if op == "-":
+        return f"SELECT ({x}) - ({y})"
+    return f"SELECT ({x}) / NULLIF(({y}), 0)"

@@ -126,12 +126,19 @@ class Score:
         return asdict(self)
 
 
-def _normalize(where: dict[str, str], s: Scenario) -> dict[str, str]:
-    """Drop a channel implied by the campaign (spring_promo implies paid_social)."""
+def normalize(where: dict[str, str], s: Scenario) -> dict[str, str]:
+    """Canonical slice: a campaign implies its channel, and the only campaign of a channel is
+    the same slice as the channel (email's newsletter == email)."""
     w = dict(where)
+    channels = {ch.name: ch for ch in s.business.channels}
     camp_channel = {c: ch.name for ch in s.business.channels for c in ch.campaigns}
-    if "campaign" in w and "channel" in w and camp_channel.get(w["campaign"]) == w["channel"]:
-        del w["channel"]
+    if "campaign" in w and w["campaign"] in camp_channel:
+        ch = camp_channel[w["campaign"]]
+        if w.get("channel") in (None, ch):
+            w.pop("channel", None)
+            if len(channels[ch].campaigns) == 1:
+                del w["campaign"]
+                w["channel"] = ch
     return w
 
 
@@ -155,7 +162,7 @@ def score(s: Scenario, answer_data: Any, con) -> Score:
     elif a.where is None:
         kind, cs, mech_ok = "missed", 0.0, False
     else:
-        got, want = _normalize(a.where, s), _normalize(s.cause["where"], s)
+        got, want = normalize(a.where, s), normalize(s.cause["where"], s)
         if got == want:
             kind, cs = "exact", 1.0
         elif got and (set(got.items()) < set(want.items()) or

@@ -23,6 +23,13 @@
   score: exact/partial/wrong/missed/correct_none/false_alarm, mechanism, change sign+size,
   verified vs unsupported evidence, success). Channel implied by campaign is normalized. 31
   tests passing.
+- M1.5 `reference.py` (no AI): change size (noise threshold 6%), drill-down while one value
+  explains >= 75% of the parent's change AND changed >= 2x more than the rest relative to
+  size (additive deltas for sums, denominator-weighted for ratios), mechanism = largest
+  relative change among relevant drivers (sessions, cpc, conversion_rate, unit_price,
+  refund_rate), evidence = literal SQL (metrics.sql_for) with values. New metrics units,
+  unit_price, refund_rate. Scoring treats a single-campaign channel as the channel. Perfect
+  on 5 planted cases + no-cause. 37 tests passing.
 
 ## Ideas for later
 
@@ -34,10 +41,9 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Milestone 1, step 5: reference diagnoser (no AI) in `src/diagnosis_forge/reference.py`:
-compute change; if |pct| below a noise threshold (from baseline weekly variation) -> no
-cause; else for each dimension of the metric, breakdown and pick the largest-|delta| value,
-then drill into it with the remaining dimensions while one value explains >= 60% of the
-parent's delta; mechanism by checking drivers on the chosen slice (sessions, cpc,
-conversion, price=AOV, refund rate) and picking the one with the largest relative change;
-evidence = the SQL it used with values. Tests on 3 planted scenarios + 1 no-cause.
+Milestone 1, step 6: dev scenarios. ~16 YAMLs in scenarios/dev/ covering all 5 drivers on
+different dimensions and metrics (revenue, ad_spend, refunds, net_revenue, orders, sessions,
+conversion_rate, roas), a few with a distractor effect, 2 no-cause; questions in plain
+English stating metric and periods. Test: each loads, its planted effect is material
+(|metric change| >= 10% unless no-cause), and the reference diagnoser succeeds. Fix
+scenarios (not the reference) when the planted change is too small.
