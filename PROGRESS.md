@@ -45,6 +45,10 @@
 - M1.8 `catalog.py` (tables, dimensions, metric definitions, answer JSON format, mechanism
   names) and CLI `diagnosis-forge eval` / `catalog`; reference solves all 5 held-out
   scenarios. Employer-terms checks clean. 62 tests passing. **Milestone 1 done.**
+- M2.1 `llm.py` (OllamaClient with reply cap, FakeLLM, extract_json) and `tools.py` ToolBox:
+  read_question (question + periods, never the cause), read_catalog, run_sql (sqlguard, 30
+  rows shown), check_answer (parse + re-run evidence, reviewer-style), submit; per-tool
+  limits; blocked SQL counted. 68 tests passing.
 
 ## Ideas for later
 
@@ -56,8 +60,8 @@ change commit dates. The GitHub repo does not exist yet: ask the user before cre
 
 ## Next step
 
-Milestone 2, step 1: LLM client (copy connector-forge llm.py, extract the JSON answer),
-agent tools with guard: ToolBox(scenario) with read_question, read_catalog, run_sql
-(sqlguard, max 50 rows shown, query budget), submit_answer (parse errors returned; scored
-later on the same data), call log. Agents see the scenario's data (that is the task) but
-never the planted cause. Then prompt and sql-loop agents + CLI.
+Milestone 2, step 2: agents.py with `prompt` (one call: catalog + question -> answer JSON)
+and `sql-loop` (each reply is either SQL: <one query> or the final JSON; up to 12 queries;
+results truncated; last turn forces an answer), AgentResult (score dict, usage, queries,
+tool log), CLI `diagnosis-forge agent --variant ...` with crash isolation and summary.json.
+Tests with FakeLLM.
